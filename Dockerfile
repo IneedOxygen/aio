@@ -1,6 +1,6 @@
 FROM debian:buster
 
-MAINTAINER jirayu, <jirayu@jirayu.fun>
+MAINTAINER oxygenproj, <oxygen-i-need-oxygen@outlook.co.th>
 
 RUN apt update \
     && apt upgrade -y \
@@ -12,19 +12,34 @@ RUN apt update \
     && apt -y install cmake \
     && apt -y install wget
 
+# Grant sudo permissions to container user for commands
 RUN apt-get update && \
     apt-get -y install sudo
-
+    
+# Ensure UTF-8
 RUN locale-gen en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
 
+
+# OpenJDK 17 LTS
+RUN apt update \
+   && apt install -y libc6-i386 libc6-x32 \
+   && wget https://download.oracle.com/java/17/latest/jdk-17_linux-x64_bin.deb -O jdk-17_linux-x64_bin.deb \
+   && apt install -y ./jdk-17_linux-x64_bin.deb \
+   && rm jdk-17_linux-x64_bin.deb
+   
+ENV JAVA_HOME=/usr/lib/jvm/jdk-17/
+ENV PATH=$PATH:$JAVA_HOME/bin
+
+# NodeJS
 RUN curl -sL https://deb.nodesource.com/setup_lts.x | bash - \
     && apt -y install nodejs \
     && apt -y install ffmpeg \
     && apt -y install make \
     && apt -y install build-essential 
-
+    
+# Python 2 & 3
 RUN apt update \
    && apt -y install zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev libbz2-dev \
    && wget https://www.python.org/ftp/python/3.11.1/Python-3.11.1.tgz \
@@ -36,15 +51,18 @@ RUN apt update \
    && cd .. \
    && rm -rf Python-3.11.1 \
    && rm Python-3.11.*.tgz 
- 
+   
+# Upgrade Pip
 RUN apt -y install python python-pip python3-pip \
    && pip3 install --upgrade pip
 
+# Golang
 RUN curl -OL https://golang.org/dl/go1.19.5.linux-amd64.tar.gz \
    && tar -C /usr/local -xvf go1.19.5.linux-amd64.tar.gz   
 ENV PATH=$PATH:/usr/local/go/bin
 ENV GOROOT=/usr/local/go
 
+#.NET Core Runtime and SDK
 RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb \
    && dpkg -i packages-microsoft-prod.deb \ 
    && rm packages-microsoft-prod.deb \
@@ -53,6 +71,7 @@ RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod
    && apt-get update \
    && apt-get install -y aspnetcore-runtime-6.0 dotnet-sdk-6.0 
 
+# Install the system dependencies required for puppeteer support
 RUN apt-get install -y \
     fonts-liberation \
     gconf-service \
@@ -85,10 +104,11 @@ RUN apt-get install -y \
     libxrender1 \
     libxss1 \
     libxtst6 \
-    xdg-utils \
-    openjdk-17-jre-headless
+    xdg-utils
 
+# Installing NodeJS dependencies for AIO.
 RUN npm i -g yarn pm2 
+
 
 USER container
 ENV  USER container
