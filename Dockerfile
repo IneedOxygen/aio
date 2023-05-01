@@ -14,20 +14,10 @@ RUN apt update \
 
 RUN apt-get update && \
     apt-get -y install sudo
-    
-# Ensure UTF-8
+
 RUN locale-gen en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
-
-RUN apt update \
-   && apt install -y libc6-i386 libc6-x32 \
-   && wget https://download.oracle.com/java/17/latest/jdk-17_linux-x64_bin.deb -O jdk-17_linux-x64_bin.deb \
-   && apt install -y ./jdk-17_linux-x64_bin.deb \
-   && rm jdk-17_linux-x64_bin.deb
-   
-ENV JAVA_HOME=/usr/lib/jvm/jdk-17/
-ENV PATH=$PATH:$JAVA_HOME/bin
 
 RUN curl -sL https://deb.nodesource.com/setup_lts.x | bash - \
     && apt -y install nodejs \
@@ -95,7 +85,8 @@ RUN apt-get install -y \
     libxrender1 \
     libxss1 \
     libxtst6 \
-    xdg-utils
+    xdg-utils \
+    openjdk-17-jre-headless
 
 RUN npm i -g yarn pm2 
 
